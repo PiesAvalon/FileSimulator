@@ -19,9 +19,10 @@ bool File::write(const string &data) {
     //TODO: write data into file content, return true if write successfully, otherwise false
     // note 1: replace "\\n" into new line "\n"
     // for example, when you wrote "Hello PA-1\n" in command line, data will be "Hello PA-1\\n"
-    content.append(data);
+    content = data;// content.append(data); **NOT sure about this**
     size_t pos = content.find("\\n");//**this is NOT tested and may involve bug**
-    if(pos < content.size()){
+    if(pos !=std::string::npos){
+        // std::cout << content[pos] << "is erased" << std::endl;
         content.erase(pos);
     }
     return true;
