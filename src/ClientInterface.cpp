@@ -9,10 +9,17 @@ std::vector<string> ClientInterface::parseCommand(const string& cmdLine) {
     // TODO: Parse command line into vector of arguments, returns vector of parsed arguments
     // note 1: split by whitespace, you can use strtok() in c or istringstream in c++ to get tokens
     // note 2: handle quote string in two bounds for per token
+    std::vector<string> v;
+    std::istringstream iss(cmdLine);
+    string token;
+    while(iss >> token){
+        v.push_back(token);//note 2 is NOT implemented!
+    }
+    return v;
 
-    fprintf(stderr, "Error: ClientInterface::parseCommand() is not implemented yet!\n");
-    assert(0);
-    return std::vector<string>();
+    // fprintf(stderr, "Error: ClientInterface::parseCommand() is not implemented yet!\n");
+    // assert(0);
+    // return std::vector<string>();
 }
 
 bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
@@ -20,10 +27,24 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
     // note 1: check first argument for command type
     // note 2: validate number of arguments
     // note 3: call corresponding operation method
+    string program = cmd[0];
+    if(program == "help"){
+        showHelp();
+        return true;
+    }
+    if(program == "create"){
+        return createFile(cmd[1]);//only creates one file
+    }
+    if(program == "delete"){
+        return deleteFile(cmd[1]);//only deletes one file
+    }
+    if(program == "read"){
+        readFile(cmd[1]);
+    }
 
-    fprintf(stderr, "Error: ClientInterface::execueCommand() is not implemented yet!\n");
-    assert(0);
-    return false;
+    // fprintf(stderr, "Error: ClientInterface::execueCommand() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 void ClientInterface::processCommand(const string& cmdLine) {
@@ -31,9 +52,12 @@ void ClientInterface::processCommand(const string& cmdLine) {
     // note 1: parse command line
     // note 2: execute command
     // note 3: handle exceptions
+    auto cmdVec = parseCommand(cmdLine);
+    execueCommand(cmdVec);
 
-    fprintf(stderr, "Error: ClientInterface::processCommand() is not implemented yet!\n");
-    assert(0);
+    
+    // fprintf(stderr, "Error: ClientInterface::processCommand() is not implemented yet!\n");
+    // assert(0);
 }
 
 void ClientInterface::showHelp() const {
@@ -60,25 +84,29 @@ bool ClientInterface::createFile(const string& name) {
     // TODO: Create new file with given name, returns true if file created successfully
     // note 1: validate file name
     // note 2: use filesystem to create file
-
-    fprintf(stderr, "Error: ClientInterface::createFile() is not implemented yet!\n");
-    assert(0);
-    return false;
+    return filesystem->createFile(name);//note 1 is NOT implemented!
+    // fprintf(stderr, "Error: ClientInterface::createFile() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 bool ClientInterface::deleteFile(const string& name) {
     // TODO: Delete file with given name, returns true if file deleted successfully
     // note 1: use filesystem to delete file
+    return filesystem->deleteFile(name, username);
 
-    fprintf(stderr, "Error: ClientInterface::deleteFile() is not implemented yet!\n");
-    assert(0);
-    return false;
+    // fprintf(stderr, "Error: ClientInterface::deleteFile() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 string ClientInterface::readFile(const string& name) {
     // TODO: Read content from file with given name, returns file content as string
     // note 1: search file by name
     // note 2: cast to File type and read content
+    auto file = dynamic_cast<File*>(filesystem->resolvePath(name));
+    file->display();
+    
 
     fprintf(stderr, "Error: ClientInterface::readFile() is not implemented yet!\n");
     assert(0);
