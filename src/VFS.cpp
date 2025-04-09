@@ -51,6 +51,9 @@ void VFS::processUserCommands(const string& username) {
         if(command == "exit" || command == "quit") {
             break;
         }
+        if(command == "exit"){
+            exit(0);
+        }
 
         try {
             client.processCommand(command);

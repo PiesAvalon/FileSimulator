@@ -29,8 +29,9 @@ std::vector<string> ClientInterface::parseCommand(const string& cmdLine) {
 
     //debug
     for(auto item : v){
-        std::cout << item << std::endl;
+        // std::cout << item << std::endl;
     }
+    // filesystem->getCurrentDir()->display();
     return v;
 
     // fprintf(stderr, "Error: ClientInterface::parseCommand() is not implemented yet!\n");
@@ -64,6 +65,35 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
     if(program == "ls"){
         listCurrentDir();
         return true;
+    }
+    if(program == "mkdir"){
+        return createDir(cmd[1]);
+    }
+    if(program == "rmdir"){
+        if(cmd.size() == 3 && cmd[3] == "-r"){
+            return deleteDir(cmd[1], true);
+        }
+        else{
+            return deleteDir(cmd[1], false);
+        }
+    }
+    if(program == "cd"){
+        return changeDir(cmd[1]);
+    }
+    if(program == "pwd"){
+        std::cout << getCurrentPath() << std::endl;
+        return true;
+    }
+    if(program == "whoami"){
+        std::cout << username << std::endl;
+        return true;
+    }
+    if(program == "clear"){
+        std::cout << "\033[2J\033[1;1H";
+        return true;
+    }
+    if(program == "exit"){
+        exit(0);
     }
     return true;
     // fprintf(stderr, "Error: ClientInterface::execueCommand() is not implemented yet!\n");
@@ -124,7 +154,14 @@ bool ClientInterface::createFile(const string& name) {
 bool ClientInterface::deleteFile(const string& name) {
     // TODO: Delete file with given name, returns true if file deleted successfully
     // note 1: use filesystem to delete file
-    return filesystem->deleteFile(name, username);
+    auto success =  filesystem->deleteFile(name, username);
+    if(success){
+        std::cout << "File deleted successfully!" << std::endl;
+    }
+    else{
+        std::cout << "File deletion failed!" << std::endl;
+    }
+    return success;
 
     // fprintf(stderr, "Error: ClientInterface::deleteFile() is not implemented yet!\n");
     // assert(0);
@@ -170,39 +207,63 @@ bool ClientInterface::writeFile(const string& name, const string& data) {
 bool ClientInterface::createDir(const string& name) {
     // TODO: Create new directory with given name, returns true if directory created successfully
     // note 1: use filesystem to create directory
-
-    fprintf(stderr, "Error: ClientInterface::createDir() is not implemented yet!\n");
-    assert(0);
-    return false;
+    bool success = filesystem->createDir(name);
+    if(success){
+        std::cout << "directory created!" << std::endl;
+    }
+    else{
+        std::cout << "directory creation failed" << std::endl;
+    }
+    return success;
+    // fprintf(stderr, "Error: ClientInterface::createDir() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 bool ClientInterface::deleteDir(const string& name, bool recursive) {
     // TODO: Delete directory with given name, returns true if directory deleted successfully
     // note 1: use filesystem to delete directory with recursive flag
+    bool success = filesystem->deleteDir(name, username, recursive);
+    if(success){
+        std::cout << "directory deleted!" << std::endl;
+    }
+    else{
+        std::cout << "deletion failed" << std::endl;
+    }
+    return success;
 
-    fprintf(stderr, "Error: ClientInterface::deleteDir() is not implemented yet!\n");
-    assert(0);
-    return false;
+    // fprintf(stderr, "Error: ClientInterface::deleteDir() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 bool ClientInterface::changeDir(const string& path) {
     // TODO: Change current directory to given path, returns true if directory changed successfully
     // note 1: resolve path to get target directory
     // note 2: validate target is directory type to set
-
-    fprintf(stderr, "Error: ClientInterface::changeDir() is not implemented yet!\n");
-    assert(0);
-    return false;
+    auto dir = filesystem->resolvePath(path);
+    std::cout << dir->getPath() << std::endl;
+    bool success = filesystem->setCurrentDir(dynamic_cast<Directory*>(dir));
+    if(success){
+        std::cout << "directory changed!" << std::endl;
+    }
+    else{
+        std::cout << "directory change failed" << std::endl;
+    }
+    return success;
+    // fprintf(stderr, "Error: ClientInterface::changeDir() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 void ClientInterface::listCurrentDir() {
     // TODO: List all contents in current directory, no return value
     // note 1: print each child's name in current directory per line
-
-    auto pwd =  filesystem->getCurrentDir();
-    for(auto item : pwd->getAll()){
-        std::cout << item->getName() << std::endl;
-    }
+    filesystem->getCurrentDir()->display();
+    // auto pwd =  filesystem->getCurrentDir();
+    // for(auto item : pwd->getAll()){
+    //     std::cout << item->getName() << std::endl;
+    // }
 
     // fprintf(stderr, "Error: ClientInterface::listCurrentDir() is not implemented yet!\n");
     // assert(0);
@@ -212,16 +273,24 @@ string ClientInterface::getCurrentPath() const {
     // TODO: Get current working directory path, returns current path as string
     // note 1: use filesystem to get current path
 
-    fprintf(stderr, "Error: ClientInterface::getCurrentPath() is not implemented yet!\n");
-    assert(0);
-    return "";
+    auto pwd =  filesystem->getCurrentDir();
+    // std::cout << pwd->getPath() << std::endl;
+    return pwd->getPath();
+    // fprintf(stderr, "Error: ClientInterface::getCurrentPath() is not implemented yet!\n");
+    // assert(0);
+    // return "";
 }
 
 string ClientInterface::search(const string& name, const string& type) {
     // TODO: Search file or directory by name, returns formatted result string
     // note 1: use filesystem to search by name
 
-    fprintf(stderr, "Error: ClientInterface::search() is not implemented yet!\n");
-    assert(0);
+    //this is not a fuctional module
+    auto a = type;
+    auto b = name;
     return "";
+
+    // fprintf(stderr, "Error: ClientInterface::search() is not implemented yet!\n");
+    // assert(0);
+    // return "";
 }

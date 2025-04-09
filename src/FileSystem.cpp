@@ -82,7 +82,9 @@ Directory* FileSystem::createDir(const string& name) {
     InodeFactory i;
     auto inode = i.generateInode();
     Directory* d = new Directory(name, username, inode, cur);
+    std::cout << "the path of the created dir is: " << d->getPath() << std::endl;
     config_table[d->getPath()] = inode;
+    cur->add(d);
     return d;
 
     fprintf(stderr, "Error: FileSystem::createDir() is not implemented yet!\n");
@@ -210,8 +212,13 @@ FileObj* FileSystem::resolvePath(const string& path) {
     // return cur;
 
     //assume path is name of file
-    if(path.find("/") == string::npos){
-        string full_path = cur->getPath() + path;
+    std::cout << "start resolving path" << std::endl;
+    if(path.find('/') == string::npos){
+        string full_path = cur->getPath() + path + "/";
+        std::cout << "the full path is: " << full_path << std::endl;
+        for(auto item : config_table){
+            std::cout << "the item is: " << item.first << std::endl;
+        }
         auto filePtr = cur->getChild(config_table[full_path]);
         return filePtr;
     }
