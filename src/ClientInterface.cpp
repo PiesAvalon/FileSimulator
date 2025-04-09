@@ -13,7 +13,23 @@ std::vector<string> ClientInterface::parseCommand(const string& cmdLine) {
     std::istringstream iss(cmdLine);
     string token;
     while(iss >> token){
+        if(token[0] == '\"'){
+            string temp;
+            while(token[token.size()-1] != '\"'){
+                temp += token + " ";
+                iss >> token;
+            }
+            temp += token;
+            temp = temp.substr(1, temp.size()-2);
+            v.push_back(temp);
+            continue;
+        }
         v.push_back(token);//note 2 is NOT implemented!
+    }
+
+    //debug
+    for(auto item : v){
+        std::cout << item << std::endl;
     }
     return v;
 
@@ -40,8 +56,16 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
     }
     if(program == "read"){
         readFile(cmd[1]);
+        return true;
     }
-
+    if(program == "write"){
+        return writeFile(cmd[1], cmd[2]);
+    }
+    if(program == "ls"){
+        listCurrentDir();
+        return true;
+    }
+    return true;
     // fprintf(stderr, "Error: ClientInterface::execueCommand() is not implemented yet!\n");
     // assert(0);
     // return false;
@@ -84,7 +108,14 @@ bool ClientInterface::createFile(const string& name) {
     // TODO: Create new file with given name, returns true if file created successfully
     // note 1: validate file name
     // note 2: use filesystem to create file
-    return filesystem->createFile(name);//note 1 is NOT implemented!
+    bool success = filesystem->createFile(name);
+    if(success){
+        std::cout << "File created successfully!" << std::endl;
+    }
+    else{
+        std::cout << "File creation failed!" << std::endl;
+    }
+    return success;//note 1 is NOT implemented!
     // fprintf(stderr, "Error: ClientInterface::createFile() is not implemented yet!\n");
     // assert(0);
     // return false;
@@ -105,12 +136,17 @@ string ClientInterface::readFile(const string& name) {
     // note 1: search file by name
     // note 2: cast to File type and read content
     auto file = dynamic_cast<File*>(filesystem->resolvePath(name));
-    file->display();
-    
-
-    fprintf(stderr, "Error: ClientInterface::readFile() is not implemented yet!\n");
-    assert(0);
+    // file->display();
+    if(file){
+        std::cout << file->getContent() << std::endl;
+        return file->getContent();
+    }
+    std::cout << "File not found!" << std::endl;
     return "";
+    
+    // fprintf(stderr, "Error: ClientInterface::readFile() is not implemented yet!\n");
+    // assert(0);
+    // return "";
 }
 
 bool ClientInterface::writeFile(const string& name, const string& data) {
@@ -118,10 +154,17 @@ bool ClientInterface::writeFile(const string& name, const string& data) {
     // note 1: search file by name
     // note 2: process quoted strings
     // note 3: cast to File type and write content
-
-    fprintf(stderr, "Error: ClientInterface::writeFile() is not implemented yet!\n");
-    assert(0);
+    auto file = dynamic_cast<File*>(filesystem->resolvePath(name));
+    if(file){
+        file->write(data);
+        std::cout << "File written successfully!" << std::endl;
+        return true;
+    }
     return false;
+
+    // fprintf(stderr, "Error: ClientInterface::writeFile() is not implemented yet!\n");
+    // assert(0);
+    // return false;
 }
 
 bool ClientInterface::createDir(const string& name) {
@@ -156,8 +199,13 @@ void ClientInterface::listCurrentDir() {
     // TODO: List all contents in current directory, no return value
     // note 1: print each child's name in current directory per line
 
-    fprintf(stderr, "Error: ClientInterface::listCurrentDir() is not implemented yet!\n");
-    assert(0);
+    auto pwd =  filesystem->getCurrentDir();
+    for(auto item : pwd->getAll()){
+        std::cout << item->getName() << std::endl;
+    }
+
+    // fprintf(stderr, "Error: ClientInterface::listCurrentDir() is not implemented yet!\n");
+    // assert(0);
 }
 
 string ClientInterface::getCurrentPath() const {

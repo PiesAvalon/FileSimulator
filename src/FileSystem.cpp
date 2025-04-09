@@ -197,16 +197,26 @@ bool FileSystem::registerUser(const string& username) {
 FileObj* FileSystem::resolvePath(const string& path) {
     // TODO: resolve path, you can use strtok() in c library or istringstream with getline() in c++
     // return target of FileObj* if resolve successfully, otherwise nullptr
-    std::istringstream iss(path);
-    string name;
-    auto newCur = root;
-    while(getline(iss, name, '/')){
-        if(!this->changeDir(search(name, "directory"))){
-            return nullptr;
-        }
+
+    // std::istringstream iss(path);
+    // string name;
+    // auto newCur = root;
+    // while(getline(iss, name, '/')){
+    //     if(!this->changeDir(search(name, "directory"))){
+    //         return nullptr;
+    //     }
+    // }
+    // cur = newCur;
+    // return cur;
+
+    //assume path is name of file
+    if(path.find("/") == string::npos){
+        string full_path = cur->getPath() + path;
+        auto filePtr = cur->getChild(config_table[full_path]);
+        return filePtr;
     }
-    cur = newCur;
-    return cur;
+    return nullptr;
+
     // fprintf(stderr, "Error: FileSystem::resolvePath() is not implemented yet!\n");
     // assert(0);  
     // return nullptr;
