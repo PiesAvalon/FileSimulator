@@ -1,4 +1,6 @@
 #include "ClientInterface.h"
+//TODO: Implement absolute path and relative path
+//TODO: Implement multiple file creation, deletion, reading
 
 ClientInterface::ClientInterface(const string& username, FileSystem* filesystem)
     : filesystem(filesystem), username(username) {
@@ -9,26 +11,37 @@ std::vector<string> ClientInterface::parseCommand(const string& cmdLine) {
     // TODO: Parse command line into vector of arguments, returns vector of parsed arguments
     // note 1: split by whitespace, you can use strtok() in c or istringstream in c++ to get tokens
     // note 2: handle quote string in two bounds for per token
-    if(cmdLine.empty()){
+    if (cmdLine.empty()) {
         return std::vector<string>();
     }
     std::vector<string> v;
     std::istringstream iss(cmdLine);
     string token;
-    while(iss >> token){
-        if(token[0] == '\"'){
-            string temp;
-            while(token[token.size()-1] != '\"'){
-                temp += token + " ";
-                iss >> token;
+    while (iss >> token) {
+        if (token[0] == '\"') {
+            string temp = token;
+            bool endQuoteFound = (temp.back() == '\"');
+            while (!endQuoteFound && iss >> token) {
+                temp += " " + token;
+                endQuoteFound = (token.back() == '\"');
             }
-            temp += token;
-            temp = temp.substr(1, temp.size()-2);
+            if (endQuoteFound) {
+                if (temp.size() >= 2) {
+                    temp = temp.substr(1, temp.size() - 2);
+                }
+                else {
+                    temp = "";
+                }
+            }
+            else {
+                temp = temp.substr(1);
+            }
             v.push_back(temp);
-            continue;
+        } else {
+            v.push_back(token);
         }
-        v.push_back(token);//note 2 is NOT implemented!
     }
+    return v;
 
     //debug
     for(auto item : v){
