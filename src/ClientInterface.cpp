@@ -1,6 +1,5 @@
 #include "ClientInterface.h"
 //TODO: Implement absolute path and relative path
-//TODO: Implement multiple file creation, deletion, reading
 
 ClientInterface::ClientInterface(const string& username, FileSystem* filesystem)
     : filesystem(filesystem), username(username) {
@@ -68,16 +67,40 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
         showHelp();
         return true;
     }
-    if(program == "create"){
-        return createFile(cmd[1]);//only creates one file
+    // if(program == "create"){
+    //     return createFile(cmd[1]);//only creates one file
+    // }
+    // if(program == "delete"){
+    //     return deleteFile(cmd[1]);//only deletes one file
+    // }
+    // if(program == "read"){
+    //     readFile(cmd[1]);
+    //     return true;
+    // }
+    if (program == "create") {
+        if (cmd.size() < 2) return false; // 检查参数是否存在
+        bool allSuccess = true;
+        for (size_t i = 1; i < cmd.size(); ++i) {
+            if (!createFile(cmd[i])) allSuccess = false;
+        }
+        return allSuccess;
     }
-    if(program == "delete"){
-        return deleteFile(cmd[1]);//only deletes one file
+    if (program == "delete") {
+        if (cmd.size() < 2) return false;
+        bool allSuccess = true;
+        for (size_t i = 1; i < cmd.size(); ++i) {
+            if (!deleteFile(cmd[i])) allSuccess = false;
+        }
+        return allSuccess;
     }
-    if(program == "read"){
-        readFile(cmd[1]);
+    if (program == "read") {
+        if (cmd.size() < 2) return false;
+        for (size_t i = 1; i < cmd.size(); ++i) {
+            readFile(cmd[i]);
+        }
         return true;
     }
+
     if(program == "write"){
         return writeFile(cmd[1], cmd[2]);
     }
