@@ -9,6 +9,9 @@ std::vector<string> ClientInterface::parseCommand(const string& cmdLine) {
     // TODO: Parse command line into vector of arguments, returns vector of parsed arguments
     // note 1: split by whitespace, you can use strtok() in c or istringstream in c++ to get tokens
     // note 2: handle quote string in two bounds for per token
+    if(cmdLine.empty()){
+        return std::vector<string>();
+    }
     std::vector<string> v;
     std::istringstream iss(cmdLine);
     string token;
@@ -44,6 +47,9 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
     // note 1: check first argument for command type
     // note 2: validate number of arguments
     // note 3: call corresponding operation method
+    if(cmd.size() == 0){
+        return true;
+    }
     string program = cmd[0];
     if(program == "help"){
         showHelp();
@@ -70,10 +76,12 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
         return createDir(cmd[1]);
     }
     if(program == "rmdir"){
-        if(cmd.size() == 3 && cmd[3] == "-r"){
+        if(cmd.size() == 3 && cmd[2] == "-r"){
+            // std::cout << "recursive delete" << std::endl;
             return deleteDir(cmd[1], true);
         }
         else{
+            // std::cout << "non-recursive delete" << std::endl;
             return deleteDir(cmd[1], false);
         }
     }
@@ -241,7 +249,22 @@ bool ClientInterface::changeDir(const string& path) {
     // TODO: Change current directory to given path, returns true if directory changed successfully
     // note 1: resolve path to get target directory
     // note 2: validate target is directory type to set
-    auto dir = filesystem->resolvePath(path);
+    if(path == ".."){
+        auto parent = filesystem->getCurrentDir()->getParent();
+        if(parent){
+            std::cout << "parent directory: " << parent->getPath() << std::endl;
+            return filesystem->setCurrentDir(dynamic_cast<Directory*>(parent));
+        }
+        else{
+            std::cout << "no parent directory" << std::endl;
+            return false;
+        }
+    }
+    auto dir = filesystem->resolvePath(path + "/");
+    if(!dir){
+        std::cout << "directory not found" << std::endl;
+        return false;
+    }
     std::cout << dir->getPath() << std::endl;
     bool success = filesystem->setCurrentDir(dynamic_cast<Directory*>(dir));
     if(success){

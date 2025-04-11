@@ -58,6 +58,10 @@ bool FileSystem::deleteFile(const string& name, const string& user){
     if(iter == config_table.end()){
         return false;
     }
+    auto target = cur->getChild(iter->second);
+    if(target->getOwner() != user){
+        return false;
+    }
     bool success = cur->remove(iter->second);
     if(!success){
         return false;
@@ -100,7 +104,22 @@ bool FileSystem::deleteDir(const string& name,const string& user, bool recursive
     if(iter == config_table.end()){
         return false;
     }
-    auto success = cur->removeDir(iter->second);
+    auto target = cur->getChild(iter->second);
+    if(target->getOwner() != user){
+        return false;
+    }
+    bool success = true;
+    if(recursive){
+        success = cur->removeDir(iter->second);
+    }
+    else{
+        if(!dynamic_cast<Directory*>(cur->getChild(iter->second))->isEmpty()){
+            return false;
+        }
+        else{
+            success = cur->removeDir(iter->second);
+        }
+    }
     if(!success){
         return success;
     }
@@ -212,16 +231,14 @@ FileObj* FileSystem::resolvePath(const string& path) {
     // return cur;
 
     //assume path is name of file
-    std::cout << "start resolving path" << std::endl;
-    if(path.find('/') == string::npos){
-        string full_path = cur->getPath() + path + "/";
-        std::cout << "the full path is: " << full_path << std::endl;
+    // std::cout << "start resolving path" << std::endl;
+        string full_path = cur->getPath() + path;
+        // std::cout << "the full path is: " << full_path << std::endl;
         for(auto item : config_table){
-            std::cout << "the item is: " << item.first << std::endl;
+            // std::cout << "the item is: " << item.first << std::endl;
         }
         auto filePtr = cur->getChild(config_table[full_path]);
         return filePtr;
-    }
     return nullptr;
 
     // fprintf(stderr, "Error: FileSystem::resolvePath() is not implemented yet!\n");
