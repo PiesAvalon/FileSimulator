@@ -15,20 +15,26 @@ string File::read() const {
     // return "";
 }
 
-bool File::write(const string &data) { 
-    //TODO: write data into file content, return true if write successfully, otherwise false
-    // note 1: replace "\\n" into new line "\n"
-    // for example, when you wrote "Hello PA-1\n" in command line, data will be "Hello PA-1\\n"
-    content = data;// content.append(data); **NOT sure about this**
-    size_t pos = content.find("\\n");//**this is NOT tested and may involve bug**
-    if(pos !=std::string::npos){
-        // std::cout << content[pos] << "is erased" << std::endl;
-        content.erase(pos);
+// bool File::write(const string &data) { 
+//     //TODO: write data into file content, return true if write successfully, otherwise false
+//     // note 1: replace "\\n" into new line "\n"
+//     // for example, when you wrote "Hello PA-1\n" in command line, data will be "Hello PA-1\\n"
+//     content = data;// content.append(data); **NOT sure about this**
+//     return true;
+// }
+
+bool File::write(const string &data) {
+    string processedData;
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (data[i] == '\\' && i+1 < data.size() && data[i+1] == 'n') {
+            processedData += '\n';   
+            ++i;                     
+        } else {
+            processedData += data[i];
+        }
     }
+    content = processedData;         
     return true;
-    // fprintf(stderr, "Error: File::write() is not implemented yet!\n");
-    // assert(0);
-    // return false;
 }
 
 string File::getContent() const {

@@ -108,6 +108,9 @@ bool FileSystem::deleteDir(const string& name,const string& user, bool recursive
     if(target->getOwner() != user){
         return false;
     }
+    if(cur->getChild(iter->second)->getType() != "directory"){
+        return false;
+    }
     bool success = true;
     if(recursive){
         success = cur->removeDir(iter->second);
@@ -233,10 +236,30 @@ FileObj* FileSystem::resolvePath(const string& path) {
     //assume path is name of file
     // std::cout << "start resolving path" << std::endl;
         string full_path = cur->getPath() + path;
-        // std::cout << "the full path is: " << full_path << std::endl;
-        for(auto item : config_table){
-            // std::cout << "the item is: " << item.first << std::endl;
+        if(path[0] == '/'){
+            full_path = path;
+            std::cout << "the full path is: " << full_path << std::endl;
         }
+        if(full_path == "//"){
+            return root;
+        }
+            std::vector<string> result;
+            string current;
+            for (char c : path) {
+                if (c == '/') {
+                    if (!current.empty()) {
+                        result.push_back(current);
+                        current.clear();
+                    }
+                } else {
+                    current += c;
+                }
+            }
+            if (!current.empty()) {
+                result.push_back(current);
+            }
+        
+        // std::cout << "the full path is: " << full_path << std::endl;
         auto filePtr = cur->getChild(config_table[full_path]);
         return filePtr;
     return nullptr;

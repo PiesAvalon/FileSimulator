@@ -108,8 +108,13 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
         listCurrentDir();
         return true;
     }
-    if(program == "mkdir"){
-        return createDir(cmd[1]);
+    if (program == "mkdir") {
+        if (cmd.size() < 2) return false;
+        bool allSuccess = true;
+        for (size_t i = 1; i < cmd.size(); ++i) {
+            if (!createDir(cmd[i])) allSuccess = false;
+        }
+        return allSuccess;
     }
     if(program == "rmdir"){
         if(cmd.size() == 3 && cmd[2] == "-r"){
@@ -138,6 +143,12 @@ bool ClientInterface::execueCommand(const std::vector<string>& cmd) {
     }
     if(program == "exit"){
         exit(0);
+        std::cout << "logout" << std::endl;
+        return true;
+    }
+    if(program == "quit"){
+        std::cout << "exit" << std::endl;
+        return true;
     }
     return true;
     // fprintf(stderr, "Error: ClientInterface::execueCommand() is not implemented yet!\n");
@@ -285,6 +296,7 @@ bool ClientInterface::changeDir(const string& path) {
     // TODO: Change current directory to given path, returns true if directory changed successfully
     // note 1: resolve path to get target directory
     // note 2: validate target is directory type to set
+    // std::cout << path << std::endl;
     if(path == ".."){
         auto parent = filesystem->getCurrentDir()->getParent();
         if(parent){
@@ -297,6 +309,9 @@ bool ClientInterface::changeDir(const string& path) {
         }
     }
     auto dir = filesystem->resolvePath(path + "/");
+    // if(path[0] == '/'){
+    //     dir = filesystem->resolvePath(path);
+    // }
     if(!dir){
         std::cout << "directory not found" << std::endl;
         return false;
